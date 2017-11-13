@@ -10,7 +10,7 @@
 namespace EPFL\Accred;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	die( 'Access denied.' );
+    die( 'Access denied.' );
 }
 
 if (! class_exists("EPFL\\SettingsBase") )
@@ -21,22 +21,26 @@ function ___($text)
     return __($text, "epfl-accred");
 }
 
-class Controller {
-	static $instance = false;
+class Controller
+{
+    static $instance = false;
     var $settings = null;
 
-    public function __construct () {
+    public function __construct ()
+    {
         $this->settings = new Settings();
     }
 
-	public static function getInstance () {
-		if ( !self::$instance ) {
+    public static function getInstance ()
+    {
+        if ( !self::$instance ) {
             self::$instance = new self;
-		}
-		return self::$instance;
-	}
+        }
+        return self::$instance;
+    }
 
-    function hook() {
+    function hook()
+    {
         $this->settings->hook();
     }
 }
@@ -65,10 +69,10 @@ class Settings extends \EPFL\SettingsBase {
 
         $this->add_settings_section('section_about', ___('À propos'));
         $this->add_settings_section('section_help', ___('Aide'));
-        $this->add_settings_section('section_parameters', ___('Paramètres'));
+        $this->add_settings_section('section_settings', ___('Paramètres'));
 
         $this->add_settings_field(
-            'section_parameters', 'field_school', ___('Faculté'),
+            'section_settings', 'field_school', ___('Faculté'),
             array(
                 'type'        => 'select',
                 'label_for'   => 'school', // makes the field name clickable,
@@ -88,7 +92,7 @@ class Settings extends \EPFL\SettingsBase {
         );
 
         $this->add_settings_field(
-            'section_parameters', 'field_admin_groups', ___('Groupes administrateur'),
+            'section_settings', 'field_admin_groups', ___("Groupes administrateur"),
             array(
                 'type'        => 'text',
                 'name'        => 'groups',
@@ -101,6 +105,7 @@ class Settings extends \EPFL\SettingsBase {
 
     function validate_settings( $settings )
     {
+        /* This is just a demo implementation that does nothing of use */
         if (false) {
             $this->add_settings_error(
                 'number-too-low',
@@ -116,7 +121,7 @@ class Settings extends \EPFL\SettingsBase {
     permet l’utilisation de <a href="https://tequila.epfl.ch/">Tequila</a>
     (Tequila est un système fédéré de gestion d’identité. Il fournit les moyens
     d’authentifier des personnes dans un réseau d’organisations) avec
-    WordPress.</p>', 'epfl-tequila');
+    Wordpress.</p>', 'epfl-tequila');
     }
 
     function render_section_help()
@@ -128,7 +133,7 @@ class Settings extends \EPFL\SettingsBase {
     GitHub</a>.</p>', 'epfl-tequila');
     }
 
-    function render_section_parameters()
+    function render_section_settings()
     {
         // Nothing — The fields in this section speak for themselves
     }
