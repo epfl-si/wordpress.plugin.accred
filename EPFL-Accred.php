@@ -53,6 +53,62 @@ class Controller
     function hook()
     {
         $this->settings->hook();
+        add_action('tequila_save_user', array($this, 'tequila_save_user'));
+    }
+
+    /**
+     * Create or update the Wordpress user from the Tequila data
+     */
+    function tequila_save_user($tequila_data)
+    {
+        $user = get_user_by("login", $tequila_data["username"]);
+        $user_role = $this->settings->get_access_level($tequila_data);
+
+        if ($user_role === null && $user === false) {
+            // User unknown and has no role: die() early (don't create it)
+            echo ___("Utilisateur inconnu");
+            die();
+        }
+
+        $userdata = array(
+            'user_nicename'  => $tequila_data['uniqueid'],  // Their "slug"
+            'nickname'       => $tequila_data['uniqueid'],
+            'user_email'     => $tequila_data['email'],
+            'user_login'     => $tequila_data['username'],
+            'first_name'     => $tequila_data['firstname'],
+            'last_name'      => $tequila_data['name'],
+            'role'           => $user_role,
+            'user_pass'      => null);
+        if ($user === false) {
+            $new_user_id = wp_insert_user($userdata);
+            if ( ! is_wp_error( $new_user_id ) ) {
+                $user = new \WP_User($new_user_id);
+            } else {
+                echo $new_user_id->get_error_message();
+                die();
+            }
+        } else {  // User is already known to WordPress
+            $userdata['ID'] = $user->ID;
+            $user_id = wp_update_user($userdata);
+        }
+
+        if ($user_role === null) {
+            // User with no role, but exists in database: die late
+            // (*after* invalidating their rights in the WP database)
+            echo ___("Accès refusé");
+            die();
+        }
+    }
+
+    function get_access_level($groups)
+    {
+        foreach ($this->settings->get_acls() as $role => $role_group) {
+            if (in_array($role_group, $groups)) {
+                return $role;
+                break;
+            }
+        }
+        return null;
     }
 }
 
@@ -168,6 +224,26 @@ TABLE_BODY;
 TABLE_FOOTER;
     }
 
+    /**
+     * @return One of the WordPress roles e.g. "administrator", "editor" etc.
+     *         or null if the user designated by $tequila_data doesn't belong
+     *         to any of the roles.
+     */
+    function get_access_level ($tequila_data)
+    {
+        $user_groups = explode(",", $tequila_data['group']);
+        $config = $this->get();
+
+        foreach (roles_plural() as $role => $unused_i18N) {
+            $role_group = $config[$role . "_group"];
+            if (($role_group === '' || $role_group === null)) continue;
+
+            if (in_array($role_group, $user_groups)) {
+                return $role;
+            }
+        }
+        return null;
+    }
 }
 
 Controller::getInstance()->hook();
