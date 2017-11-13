@@ -102,8 +102,8 @@ class Controller
 
     function get_access_level($groups)
     {
-        foreach ($this->settings->get_acls() as $role => $role_group) {
-            if (in_array($role_group, $groups)) {
+        foreach ($this->settings->get_acls() as $role => $role_setting) {
+            if (in_array($role_setting, $groups)) {
                 return $role;
                 break;
             }
@@ -129,24 +129,19 @@ class Settings extends \EPFL\SettingsBase {
      */
     function setup_options_page()
     {
-        $defaults = array('school' => 'STI');
-        foreach (roles_plural() as $key => $unused_i18N) {
-            $defaults[$key . "_group"] = '';
-        }
-
-        $data = $this->get_with_defaults($defaults);
 
         $this->add_settings_section('section_about', ___('À propos'));
         $this->add_settings_section('section_help', ___('Aide'));
         $this->add_settings_section('section_settings', ___('Paramètres'));
 
+        $this->register_setting('school', array(
+            'type'    => 'string',
+            'default' => 'STI'
+        ));
         $this->add_settings_field(
-            'section_settings', 'field_school', ___('Faculté'),
+            'section_settings', 'school', ___('Faculté'),
             array(
                 'type'        => 'select',
-                'label_for'   => 'school', // makes the field name clickable,
-                'name'        => 'school', // value for 'name' attribute
-                'value'       => $data['school'],
                 'options'     => array(
                     'ENAC'      => ___('Architecture, Civil and Environmental Engineering — ENAC'),
                     'SB'        => ___('Basic Sciences — SB'),
@@ -160,8 +155,17 @@ class Settings extends \EPFL\SettingsBase {
             )
         );
 
+        foreach ($this->role_settings() as $role => $role_setting) {
+            $this->register_setting($role_setting, array(
+                'type'    => 'string',
+                'default' => ''
+            ));
+        }
+
+        // Not really a "field", but use the rendering callback mechanisms
+        // we have:
         $this->add_settings_field(
-            'section_settings', 'field_admin_groups', ___("Contrôle d'accès par groupe"),
+            'section_settings', 'admin_groups', ___("Contrôle d'accès par groupe"),
             array(
                 'help' => 'Groupe permettant l’accès administrateur.'
             )
@@ -207,14 +211,14 @@ class Settings extends \EPFL\SettingsBase {
         $role_column_head  = ___("Rôle");
         $group_column_head = ___("Groupe");
         echo <<<TABLE_HEADER
-            <table>
+            <table id="admin_groups">
               <tr><th>$role_column_head</th>
                   <th>$group_column_head</th></tr>
 TABLE_HEADER;
-        foreach (roles_plural() as $role => $access_level) {
-            $settings_key = $role . "_group";
-            $input_name = sprintf('%1$s[%2$s]', $this->option_name(), $settings_key);
-            $input_value = $this->get()[$settings_key];
+        foreach ($this->role_settings() as $role => $role_setting) {
+            $input_name = $this->option_name($role_setting);
+            $input_value = $this->get($role_setting);
+            $access_level = roles_plural()[$role];
             echo <<<TABLE_BODY
               <tr><th>$access_level</th><td><input type="text" name="$input_name" value="$input_value" class="regular-text"/></td></tr>
 TABLE_BODY;
@@ -232,10 +236,9 @@ TABLE_FOOTER;
     function get_access_level ($tequila_data)
     {
         $user_groups = explode(",", $tequila_data['group']);
-        $config = $this->get();
 
-        foreach (roles_plural() as $role => $unused_i18N) {
-            $role_group = $config[$role . "_group"];
+        foreach ($this->role_settings() as $role => $role_setting) {
+            $role_group = $this->get($role_setting);
             if (($role_group === '' || $role_group === null)) continue;
 
             if (in_array($role_group, $user_groups)) {
@@ -243,6 +246,14 @@ TABLE_FOOTER;
             }
         }
         return null;
+    }
+
+    function role_settings () {
+        $retval = array();
+        foreach (roles_plural() as $role => $unused_i18N) {
+            $retval[$role] = $role . "_group";
+        }
+        return $retval;
     }
 }
 
