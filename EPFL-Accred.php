@@ -21,6 +21,17 @@ function ___($text)
     return __($text, "epfl-accred");
 }
 
+function roles_plural()
+{
+    return array(
+        "administrator" => ___("Administrateurs"),
+        "editor"        => ___("Éditeurs"),
+        "author"        => ___("Auteurs"),
+        "contributor"   => ___("Contributeurs"),
+        "subscriber"    => ___("Abonnés")
+    );
+}
+
 class Controller
 {
     static $instance = false;
@@ -62,10 +73,12 @@ class Settings extends \EPFL\SettingsBase {
      */
     function setup_options_page()
     {
-        $data = $this->get_with_defaults(array(  // Default values
-            'groups'    => 'stiitweb',
-            'school'   => 'STI'
-        ));
+        $defaults = array('school' => 'STI');
+        foreach (roles_plural() as $key => $unused_i18N) {
+            $defaults[$key . "_group"] = '';
+        }
+
+        $data = $this->get_with_defaults($defaults);
 
         $this->add_settings_section('section_about', ___('À propos'));
         $this->add_settings_section('section_help', ___('Aide'));
@@ -92,12 +105,8 @@ class Settings extends \EPFL\SettingsBase {
         );
 
         $this->add_settings_field(
-            'section_settings', 'field_admin_groups', ___("Groupes administrateur"),
+            'section_settings', 'field_admin_groups', ___("Contrôle d'accès par groupe"),
             array(
-                'type'        => 'text',
-                'name'        => 'groups',
-                'label_for'   => 'groups',
-                'value'       => $data['groups'],
                 'help' => 'Groupe permettant l’accès administrateur.'
             )
         );
@@ -137,46 +146,28 @@ class Settings extends \EPFL\SettingsBase {
     {
         // Nothing — The fields in this section speak for themselves
     }
-
-    function render_field_admin_groups($args)
+    function render_field_admin_groups ()
     {
-        /* Creates this markup:
-           /* <input name="plugin:option_name[number]"
-        */
-        printf(
-            '<input name="%1$s[%2$s]" id="%3$s" value="%4$s" class="regular-text">',
-            $args['option_name'],
-            $args['name'],
-            $args['label_for'],
-            $args['value']
-        );
-        if ($args['help']) {
-            echo '<br />&nbsp;<i>' . $args['help'] . '</i>';
+        $role_column_head  = ___("Rôle");
+        $group_column_head = ___("Groupe");
+        echo <<<TABLE_HEADER
+            <table>
+              <tr><th>$role_column_head</th>
+                  <th>$group_column_head</th></tr>
+TABLE_HEADER;
+        foreach (roles_plural() as $role => $access_level) {
+            $settings_key = $role . "_group";
+            $input_name = sprintf('%1$s[%2$s]', $this->option_name(), $settings_key);
+            $input_value = $this->get()[$settings_key];
+            echo <<<TABLE_BODY
+              <tr><th>$access_level</th><td><input type="text" name="$input_name" value="$input_value" class="regular-text"/></td></tr>
+TABLE_BODY;
         }
+        echo <<<TABLE_FOOTER
+            </table>
+TABLE_FOOTER;
     }
 
-    function render_field_school($args)
-    {
-        printf(
-            '<select name="%1$s[%2$s]" id="%3$s">',
-            $args['option_name'],
-            $args['name'],
-            $args['label_for']
-        );
-
-        foreach ($args['options'] as $val => $title) {
-            printf(
-                '<option value="%1$s" %2$s>%3$s</option>',
-                $val,
-                selected($val, $args['value'], false),
-                $title
-            );
-        }
-        print '</select>';
-        if ($args['help']) {
-            echo '<br />&nbsp;<i>' . $args['help'] . '</i>';
-        }
-    }
 }
 
 Controller::getInstance()->hook();
