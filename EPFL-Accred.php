@@ -13,8 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
     die( 'Access denied.' );
 }
 
-if (! class_exists("EPFL\\SettingsBase") )
+if (! class_exists("EPFL\\SettingsBase") ) {
     require_once(dirname(__FILE__) . "/inc/settings.php");
+}
+require_once(dirname(__FILE__) . "/inc/cli.php");
 
 function ___($text)
 {
@@ -53,6 +55,7 @@ class Controller
     function hook()
     {
         $this->settings->hook();
+        (new CLI($this))->hook();
         add_action('tequila_save_user', array($this, 'tequila_save_user'));
     }
 
