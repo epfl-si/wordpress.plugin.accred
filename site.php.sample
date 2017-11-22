@@ -1,0 +1,10 @@
+<?php
+
+/* Copy and modify this file to site.php to tweak this plugin for your site. */
+
+namespace EPFL\Accred;
+
+if (! defined('ABSPATH')) {
+    die('Access denied.');
+}
+

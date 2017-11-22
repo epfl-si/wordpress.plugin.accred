@@ -18,6 +18,11 @@ if (! class_exists("EPFL\\SettingsBase") ) {
 }
 require_once(dirname(__FILE__) . "/inc/cli.php");
 
+if (file_exists(dirname(__FILE__) . "/site.php")) {
+    require_once(dirname(__FILE__) . "/site.php");
+}
+
+
 function ___($text)
 {
     return __($text, "epfl-accred");
