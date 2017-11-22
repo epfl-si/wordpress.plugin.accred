@@ -18,11 +18,6 @@ if (! class_exists("EPFL\\SettingsBase") ) {
 }
 require_once(dirname(__FILE__) . "/inc/cli.php");
 
-if (file_exists(dirname(__FILE__) . "/site.php")) {
-    require_once(dirname(__FILE__) . "/site.php");
-}
-
-
 function ___($text)
 {
     return __($text, "epfl-accred");
@@ -134,6 +129,7 @@ class Controller
 
 class Settings extends \EPFL\SettingsBase {
     const SLUG = "epfl_accred";
+    var $vpsi_lockdown = false;
 
     function hook() {
         parent::hook();
@@ -154,22 +150,24 @@ class Settings extends \EPFL\SettingsBase {
         $this->add_settings_section('section_help', ___('Aide'));
         $this->add_settings_section('section_settings', ___('Paramètres'));
 
-        $this->register_setting('unit', array(
-            'type'    => 'string',
-        ));
-        $this->add_settings_field(
-            'section_settings', 'unit', ___('Unité'),
-            array(
-                'type'        => 'text',
-                'help' => ___('Si ce champ est rempli, les droits accred de cette unité sont appliqués en sus des groupes ci-dessous.')
-            )
-        );
-
         foreach ($this->role_settings() as $role => $role_setting) {
             $this->register_setting($role_setting, array(
                 'type'    => 'string',
                 'default' => ''
             ));
+        }
+
+        if (! $this->vpsi_lockdown) {
+            $this->register_setting('unit', array(
+                'type'    => 'string',
+            ));
+            $this->add_settings_field(
+                'section_settings', 'unit', ___('Unité'),
+                array(
+                    'type'        => 'text',
+                    'help' => ___('Si ce champ est rempli, les droits accred de cette unité sont appliqués en sus des groupes ci-dessous.')
+                )
+            );
         }
 
         // Not really a "field", but use the rendering callback mechanisms
@@ -289,11 +287,21 @@ TABLE_FOOTER;
 
     function role_settings () {
         $retval = array();
-        foreach (Roles::keys() as $role) {
+        if ($this->vpsi_lockdown) {
+            $roles = ["subscriber"];
+        } else {
+            $roles = Roles::keys();
+        }
+        foreach ($roles as $role) {
             $retval[$role] = $role . "_group";
         }
         return $retval;
     }
+}
+
+
+if (file_exists(dirname(__FILE__) . "/site.php")) {
+    require_once(dirname(__FILE__) . "/site.php");
 }
 
 Controller::getInstance()->hook();
