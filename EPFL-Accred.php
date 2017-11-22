@@ -102,17 +102,6 @@ class Controller
             die();
         }
     }
-
-    function get_access_level($groups)
-    {
-        foreach ($this->settings->get_acls() as $role => $role_setting) {
-            if (in_array($role_setting, $groups)) {
-                return $role;
-                break;
-            }
-        }
-        return null;
-    }
 }
 
 class Settings extends \EPFL\SettingsBase {
@@ -173,18 +162,6 @@ class Settings extends \EPFL\SettingsBase {
                 'help' => 'Groupe permettant l’accès administrateur.'
             )
         );
-    }
-
-    function validate_settings( $settings )
-    {
-        /* This is just a demo implementation that does nothing of use */
-        if (false) {
-            $this->add_settings_error(
-                'number-too-low',
-                ___('Number must be between 1 and 1000.')
-            );
-        }
-        return $settings;
     }
 
     function render_section_about()
