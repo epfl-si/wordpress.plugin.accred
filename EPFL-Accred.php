@@ -240,6 +240,15 @@ TABLE_FOOTER;
      */
     function get_access_level ($tequila_data)
     {
+        $access_levels = array(
+            $this->get_access_level_from_groups($tequila_data),
+            $this->get_access_level_from_accred($tequila_data));
+        usort($access_levels, 'EPFL\Accred\Roles::compare');
+        return $access_levels[0];
+    }
+
+    function get_access_level_from_groups ($tequila_data)
+    {
         $user_groups = explode(",", $tequila_data['group']);
 
         foreach ($this->role_settings() as $role => $role_setting) {
@@ -251,6 +260,26 @@ TABLE_FOOTER;
             }
         }
         return null;
+    }
+
+    function get_access_level_from_accred ($tequila_data)
+    {
+        $owner_unit = trim($this->get('unit'));
+        if (empty($owner_unit)) {
+            return null;
+        }
+        if ($this->_find_unit_in_droits($owner_unit, $tequila_data['droit-WordPress.Admin'])) {
+            return "administrator";
+        } elseif ($this->_find_unit_in_droits($owner_unit, $tequila_data['droit-WordPress.Editor'])) {
+            return "editor";
+        } else {
+            return null;
+        }
+    }
+
+    function _find_unit_in_droits ($unit, $comma_separated_list_of_units) {
+        $found = array_search($unit, explode(",", $comma_separated_list_of_units));
+        return ($found !== FALSE);
     }
 
     function role_settings () {
