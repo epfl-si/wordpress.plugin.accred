@@ -23,15 +23,28 @@ function ___($text)
     return __($text, "epfl-accred");
 }
 
-function roles_plural()
+class Roles
 {
-    return array(
-        "administrator" => ___("Administrateurs"),
-        "editor"        => ___("Éditeurs"),
-        "author"        => ___("Auteurs"),
-        "contributor"   => ___("Contributeurs"),
-        "subscriber"    => ___("Abonnés")
-    );
+    private static function _allroles ()
+    {
+        return array(
+            "administrator" => ___("Administrateurs"),
+            "editor"        => ___("Éditeurs"),
+            "author"        => ___("Auteurs"),
+            "contributor"   => ___("Contributeurs"),
+            "subscriber"    => ___("Abonnés")
+        );
+    }
+
+    static function plural ($role)
+    {
+        return Roles::_allroles()[$role];
+    }
+
+    static function keys ()
+    {
+        return array_keys(Roles::_allroles());
+    }
 }
 
 class Controller
@@ -198,7 +211,7 @@ TABLE_HEADER;
         foreach ($this->role_settings() as $role => $role_setting) {
             $input_name = $this->option_name($role_setting);
             $input_value = $this->get($role_setting);
-            $access_level = roles_plural()[$role];
+            $access_level = Roles::plural($role);
             echo <<<TABLE_BODY
               <tr><th>$access_level</th><td><input type="text" name="$input_name" value="$input_value" class="regular-text"/></td></tr>
 TABLE_BODY;
@@ -230,7 +243,7 @@ TABLE_FOOTER;
 
     function role_settings () {
         $retval = array();
-        foreach (roles_plural() as $role => $unused_i18N) {
+        foreach (Roles::keys() as $role) {
             $retval[$role] = $role . "_group";
         }
         return $retval;
