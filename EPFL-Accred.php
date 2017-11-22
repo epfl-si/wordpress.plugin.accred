@@ -45,6 +45,16 @@ class Roles
     {
         return array_keys(Roles::_allroles());
     }
+
+    static function compare ($role1, $role2)
+    {
+        if ($role1 === null and $role2 === null) return 0;
+        if ($role1 === null) return 1;
+        if ($role2 === null) return -1;
+        $index1 = array_search($role1, Roles::keys());
+        $index2 = array_search($role2, Roles::keys());
+        return $index1 <=> $index2;
+    }
 }
 
 class Controller
