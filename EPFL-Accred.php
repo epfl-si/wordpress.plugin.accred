@@ -139,24 +139,14 @@ class Settings extends \EPFL\SettingsBase {
         $this->add_settings_section('section_help', ___('Aide'));
         $this->add_settings_section('section_settings', ___('Paramètres'));
 
-        $this->register_setting('school', array(
+        $this->register_setting('unit', array(
             'type'    => 'string',
-            'default' => 'STI'
         ));
         $this->add_settings_field(
-            'section_settings', 'school', ___('Faculté'),
+            'section_settings', 'unit', ___('Unité'),
             array(
-                'type'        => 'select',
-                'options'     => array(
-                    'ENAC'      => ___('Architecture, Civil and Environmental Engineering — ENAC'),
-                    'SB'        => ___('Basic Sciences — SB'),
-                    'STI'       => ___('Engineering — STI'),
-                    'IC'        => ___('Computer and Communication Sciences — IC'),
-                    'SV'        => ___('Life Sciences — SV'),
-                    'CDM'       => ___('Management of Technology — CDM'),
-                    'CDH'       => ___('College of Humanities — CDH')
-                ),
-                'help' => 'Permet de sélectionner les accès par défaut (droit wordpress.faculté).'
+                'type'        => 'text',
+                'help' => ___('Si ce champ est rempli, les droits accred de cette unité sont appliqués en sus des groupes ci-dessous.')
             )
         );
 
@@ -172,27 +162,39 @@ class Settings extends \EPFL\SettingsBase {
         $this->add_settings_field(
             'section_settings', 'admin_groups', ___("Contrôle d'accès par groupe"),
             array(
-                'help' => 'Groupe permettant l’accès administrateur.'
+                'help' => ___('Groupes permettant l’accès aux différents niveaux définis par Wordpress.')
             )
         );
     }
 
     function render_section_about()
     {
-        echo __('<p><a href="https://github.com/epfl-sti/wordpress.plugin.tequila">EPFL-tequila</a>
-    permet l’utilisation de <a href="https://tequila.epfl.ch/">Tequila</a>
-    (Tequila est un système fédéré de gestion d’identité. Il fournit les moyens
-    d’authentifier des personnes dans un réseau d’organisations) avec
-    Wordpress.</p>', 'epfl-tequila');
+        echo "<p>\n";
+        echo ___(<<<ABOUT
+<a href="https://github.com/epfl-sti/wordpress.plugin.accred">EPFL-Accred</a>
+peut être utilisé avec ou sans le <a
+href="https://github.com/epfl-sti/wordpress.plugin.tequila">plug-in
+EPFL-tequila</a>. Il crée automatiquement les utilisateurs dans Wordpress,
+et synchronise leurs droits depuis les informations institutionnelles
+de l'EPFL — Soit depuis Accred, soit depuis un groupe <i>ad
+hoc</i>.
+ABOUT
+);
+        echo "</p>\n";
     }
 
     function render_section_help()
     {
-        echo __('<p>En cas de problème avec EPFL-tequila veuillez créer une
-    <a href="https://github.com/epfl-sti/wordpress.plugin.tequila/issues/new"
+        echo "<p>\n";
+        echo ___(<<<HELP
+En cas de problème avec EPFL-Accred veuillez créer une
+    <a href="https://github.com/epfl-sti/wordpress.plugin.accred/issues/new"
     target="_blank">issue</a> sur le dépôt
-    <a href="https://github.com/epfl-sti/wordpress.plugin.tequila/issues">
-    GitHub</a>.</p>', 'epfl-tequila');
+    <a href="https://github.com/epfl-sti/wordpress.plugin.accred/issues">
+    GitHub</a>.
+HELP
+);
+        echo "</p>\n";
     }
 
     function render_section_settings()
