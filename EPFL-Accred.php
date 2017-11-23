@@ -2,7 +2,7 @@
 /*
  * Plugin Name: EPFL Accred
  * Description: Automatically sync access rights to WordPress from EPFL's institutional data repositories
- * Version:     0.3
+ * Version:     0.6
  * Author:      Dominique Quatravaux
  * Author URI:  mailto:dominique.quatravaux@epfl.ch
  */
