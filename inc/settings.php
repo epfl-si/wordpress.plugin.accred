@@ -242,9 +242,17 @@ class SettingsBase
 
     /**
      * Like WordPress' register_setting, only simpler
+     *
+     * If a method called "sanitize_$key" exists, it is automagically
+     * used as $args["sanitize_callback"] (unless that key is set
+     * explicitly).
      */
     function register_setting ($key, $args)
     {
+        if ( (! array_key_exists("sanitize_callback", $args)) and
+             method_exists($this, "sanitize_$key") ) {
+            $args["sanitize_callback"] = array($this, "sanitize_$key");
+        }
         register_setting(
             $this->option_group(),
             $this->option_name($key),
