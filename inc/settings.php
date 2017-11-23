@@ -22,15 +22,13 @@ if (! defined('ABSPATH')) {
  *     const SLUG
  *
  *     function hook()
- *        -> but should not forget to call parent::hook()
+ *        -> and should not forget to call parent::hook()
  *
- * Subclasses may define:
- *
- *     function validate_settings ( $settings )
- *        -> should return a sanitized copy of $settings
- *        -> might call $this->add_settings_error()
- *
- * @see https://wordpress.stackexchange.com/questions/100023/settings-api-with-arrays-example
+ * @see
+ * https://wordpress.stackexchange.com/questions/100023/settings-api-with-arrays-example
+ * except that we use one wp_options row per setting, allowing for
+ * straightforward integration with the "wp option update" CLI
+ * functionality
  */
 
 if (! class_exists('EPFL\SettingsBase')):
