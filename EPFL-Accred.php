@@ -328,7 +328,7 @@ TABLE_FOOTER;
         return $retval;
     }
 
-    function sanitize_unit ($value, $request, $param)
+    function sanitize_unit ($value)
     {
         return strtoupper(trim($value));
     }
