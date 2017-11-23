@@ -255,9 +255,9 @@ TABLE_FOOTER;
         $access_levels = array(
             $this->get_access_level_from_groups($tequila_data),
             $this->get_access_level_from_accred($tequila_data));
-        var_dump($access_levels);
+        $this->debug("Before sorting:" . var_export($access_levels, true));
         usort($access_levels, 'EPFL\Accred\Roles::compare');
-        var_dump($access_levels);
+        $this->debug("After sorting:" . var_export($access_levels, true));
         return $access_levels[0];
     }
 
