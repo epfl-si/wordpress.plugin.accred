@@ -61,6 +61,7 @@ class Controller
 {
     static $instance = false;
     var $settings = null;
+    var $is_debug_enabled = false;
 
     public function __construct ()
     {
@@ -246,7 +247,9 @@ TABLE_FOOTER;
         $access_levels = array(
             $this->get_access_level_from_groups($tequila_data),
             $this->get_access_level_from_accred($tequila_data));
+        var_dump($access_levels);
         usort($access_levels, 'EPFL\Accred\Roles::compare');
+        var_dump($access_levels);
         return $access_levels[0];
     }
 
@@ -259,6 +262,7 @@ TABLE_FOOTER;
             if (($role_group === '' || $role_group === null)) continue;
 
             if (in_array($role_group, $user_groups)) {
+                $this->debug("Access level from groups is $role");
                 return $role;
             }
         }
@@ -272,11 +276,20 @@ TABLE_FOOTER;
             return null;
         }
         if ($this->_find_unit_in_droits($owner_unit, $tequila_data['droit-WordPress.Admin'])) {
+            $this->debug("Access level from accred is administrator");
             return "administrator";
         } elseif ($this->_find_unit_in_droits($owner_unit, $tequila_data['droit-WordPress.Editor'])) {
+            $this->debug("Access level from accred is administrator");
             return "editor";
         } else {
             return null;
+        }
+    }
+
+    function debug ($msg)
+    {
+        if ($this->is_debug_enabled) {
+            error_log($msg);
         }
     }
 
