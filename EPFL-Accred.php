@@ -96,7 +96,7 @@ class Controller
     function tequila_save_user($tequila_data)
     {
         $user = get_user_by("login", $tequila_data["username"]);
-        $user_role = $this->settings->get_access_level($tequila_data);
+        $user_role = $this->settings->get_access_level($tequila_data) || '';
 
         if (empty(trim($user_role)) && $user === false) {
             // User unknown and has no role: die() early (don't create it)
