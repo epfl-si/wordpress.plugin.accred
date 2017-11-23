@@ -63,6 +63,13 @@ class Controller
     var $settings = null;
     var $is_debug_enabled = false;
 
+    function debug ($msg)
+    {
+        if ($this->is_debug_enabled) {
+            error_log($msg);
+        }
+    }
+
     public function __construct ()
     {
         $this->settings = new Settings();
@@ -131,6 +138,7 @@ class Controller
 class Settings extends \EPFL\SettingsBase {
     const SLUG = "epfl_accred";
     var $vpsi_lockdown = false;
+    var $is_debug_enabled = false;
 
     function hook() {
         parent::hook();

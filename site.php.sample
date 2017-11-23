@@ -9,6 +9,7 @@ if (! defined('ABSPATH')) {
 }
 
 // Controller::getInstance()->is_debug_enabled = true;
+// Controller::getInstance()->settings->is_debug_enabled = true;
 
 // Uncomment to lock down the EPFL-Accred settings page to the user-serviceable
 // parts only, as per VPSI policy.
