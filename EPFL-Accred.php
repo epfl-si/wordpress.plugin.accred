@@ -135,12 +135,14 @@ class Controller
     }
 }
 
-class Settings extends \EPFL\SettingsBase {
+class Settings extends \EPFL\SettingsBase
+{
     const SLUG = "epfl_accred";
     var $vpsi_lockdown = false;
     var $is_debug_enabled = false;
 
-    function hook() {
+    function hook()
+    {
         parent::hook();
         $this->add_options_page(
             ___('Réglages de Accred'),                  // $page_title,
@@ -205,7 +207,7 @@ ABOUT
         echo "</p>\n";
     }
 
-    function render_section_help()
+    function render_section_help ()
     {
         echo "<p>\n";
         echo ___(<<<HELP
@@ -219,7 +221,7 @@ HELP
         echo "</p>\n";
     }
 
-    function render_section_settings()
+    function render_section_settings ()
     {
         // Nothing — The fields in this section speak for themselves
     }
@@ -311,7 +313,8 @@ TABLE_FOOTER;
         return ($found !== FALSE);
     }
 
-    function role_settings () {
+    function role_settings ()
+    {
         $retval = array();
         if ($this->vpsi_lockdown) {
             $roles = ["subscriber"];
