@@ -98,7 +98,7 @@ class Controller
         $user = get_user_by("login", $tequila_data["username"]);
         $user_role = $this->settings->get_access_level($tequila_data);
 
-        if ($user_role === null && $user === false) {
+        if (empty(trim($user_role)) && $user === false) {
             // User unknown and has no role: die() early (don't create it)
             echo ___("Utilisateur inconnu");
             die();
@@ -126,7 +126,7 @@ class Controller
             $user_id = wp_update_user($userdata);
         }
 
-        if ($user_role === null) {
+        if (empty(trim($user_role))) {
             // User with no role, but exists in database: die late
             // (*after* invalidating their rights in the WP database)
             echo ___("Accès refusé");
@@ -263,11 +263,12 @@ TABLE_FOOTER;
 
     function get_access_level_from_groups ($tequila_data)
     {
+        if (empty(trim($tequila_data['group']))) return null;
         $user_groups = explode(",", $tequila_data['group']);
 
         foreach ($this->role_settings() as $role => $role_setting) {
             $role_group = $this->get($role_setting);
-            if (($role_group === '' || $role_group === null)) continue;
+            if (empty(trim($role_group))) continue;
 
             if (in_array($role_group, $user_groups)) {
                 $this->debug("Access level from groups is $role");
@@ -301,8 +302,9 @@ TABLE_FOOTER;
         }
     }
 
-    function _find_unit_in_droits ($unit, $comma_separated_list_of_units) {
-        if (empty(trim($comma_separated_list_of_units))) {
+    function _find_unit_in_droits ($unit, $comma_separated_list_of_units)
+    {
+        if (empty(trim($comma_separated_list_of_units)) or empty(trim($unit))) {
             return FALSE;
         }
         $found = array_search($unit, explode(",", $comma_separated_list_of_units));
