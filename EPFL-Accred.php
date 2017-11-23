@@ -172,6 +172,7 @@ class Settings extends \EPFL\SettingsBase
             $this->register_setting('unit', array(
                 'type'    => 'string',
             ));
+            // See ->sanitize_unit()
             $this->add_settings_field(
                 'section_settings', 'unit', ___('Unité'),
                 array(
@@ -325,6 +326,11 @@ TABLE_FOOTER;
             $retval[$role] = $role . "_group";
         }
         return $retval;
+    }
+
+    function sanitize_unit ($value, $request, $param)
+    {
+        return strtoupper(trim($value));
     }
 }
 
