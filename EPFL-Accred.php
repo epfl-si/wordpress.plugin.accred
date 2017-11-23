@@ -302,6 +302,9 @@ TABLE_FOOTER;
     }
 
     function _find_unit_in_droits ($unit, $comma_separated_list_of_units) {
+        if (empty(trim($comma_separated_list_of_units))) {
+            return FALSE;
+        }
         $found = array_search($unit, explode(",", $comma_separated_list_of_units));
         return ($found !== FALSE);
     }
