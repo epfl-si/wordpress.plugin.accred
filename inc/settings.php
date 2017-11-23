@@ -32,7 +32,8 @@ if (! defined('ABSPATH')) {
  */
 
 if (! class_exists('EPFL\SettingsBase')):
-class SettingsBase {
+class SettingsBase
+{
     public function hook()
     { 
     }
