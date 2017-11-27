@@ -113,7 +113,9 @@ class Controller
             'last_name'      => $tequila_data['name'],
             'role'           => $user_role,
             'user_pass'      => null);
+        $this->debug(var_export($userdata, true));
         if ($user === false) {
+            $this->debug("Inserting user");
             $new_user_id = wp_insert_user($userdata);
             if ( ! is_wp_error( $new_user_id ) ) {
                 $user = new \WP_User($new_user_id);
@@ -122,6 +124,7 @@ class Controller
                 die();
             }
         } else {  // User is already known to WordPress
+            $this->debug("Updating user");
             $userdata['ID'] = $user->ID;
             $user_id = wp_update_user($userdata);
         }
@@ -255,6 +258,7 @@ TABLE_FOOTER;
      */
     function get_access_level ($tequila_data)
     {
+        $this->debug("get_access_level() called for " . var_export($tequila_data, true));
         $access_levels = array(
             $this->get_access_level_from_groups($tequila_data),
             $this->get_access_level_from_accred($tequila_data));
