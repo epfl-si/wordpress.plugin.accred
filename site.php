@@ -1,6 +1,6 @@
 <?php
 
-/* Copy and modify this file to site.php to tweak this plugin for your site. */
+/* Edit this file to site.php to tweak this plugin for your site. */
 
 namespace EPFL\Accred;
 
