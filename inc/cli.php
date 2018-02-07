@@ -15,7 +15,7 @@ class CLI
     public function hook ()
     {
         if ( class_exists( '\WP_CLI' ) ) {
-            WP_CLI::add_command( 'accred', array($this, invoke), array( 'short_desc' => 'Accred command-line operations' ) );
+            WP_CLI::add_command( 'accred', array($this, 'invoke'), array( 'short_desc' => 'Accred command-line operations' ) );
         }
     }
 
