@@ -103,7 +103,7 @@ class Controller
 
         if (empty(trim($user_role)) && $user === false) {
             // User unknown and has no role: die() early (don't create it)
-            echo ___("Utilisateur inconnu");
+            header("Location: " . $this->get_403_url());
             die();
         }
 
@@ -135,9 +135,21 @@ class Controller
         if (empty(trim($user_role))) {
             // User with no role, but exists in database: die late
             // (*after* invalidating their rights in the WP database)
-            echo ___("Accès refusé");
+            header("Location: " . $this->get_403_url());
             die();
         }
+    }
+    
+    /**
+     * Returns the URL the user is redirect to for a 403 (access denied) error.
+     */
+    function get_403_url()
+    {
+    	$unit_label = $this->settings->get('unit');
+    	
+    	$url = "/global-error/403.php?error_type=accred&unit_label=${unit_label}";
+    
+      return $url;
     }
 }
 
