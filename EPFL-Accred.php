@@ -103,7 +103,7 @@ class Controller
 
         if (empty(trim($user_role)) && $user === false) {
             // User unknown and has no role: die() early (don't create it)
-            header("Location: " . $this->get_403_url());
+            do_action("epfl_accred_403_user_no_role");
             die();
         }
 
@@ -135,23 +135,9 @@ class Controller
         if (empty(trim($user_role))) {
             // User with no role, but exists in database: die late
             // (*after* invalidating their rights in the WP database)
-            header("Location: " . $this->get_403_url());
+            do_action("epfl_accred_403_user_no_role");
             die();
         }
-    }
-    
-    /**
-     * Returns the URL the user is redirect to for a 403 (access denied) error.
-     */
-    function get_403_url()
-    {
-    	$right = "WordPress.Editor";
-    	
-    	$unit_label = $this->settings->get('unit');
-    	
-    	$url = "/global-error/403.php?error_type=accred&right=${right}&unit_label=${unit_label}";
-    
-      return $url;
     }
 }
 
