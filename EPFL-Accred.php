@@ -145,9 +145,11 @@ class Controller
      */
     function get_403_url()
     {
+    	$right = "WordPress.Editor";
+    	
     	$unit_label = $this->settings->get('unit');
     	
-    	$url = "/global-error/403.php?error_type=accred&unit_label=${unit_label}";
+    	$url = "/global-error/403.php?error_type=accred&right=${right}&unit_label=${unit_label}";
     
       return $url;
     }
