@@ -21,7 +21,7 @@ function get_403_url()
 	
     $unit_label = Controller::getInstance()->settings->get('unit');
 	
-	 $unit_id = Controller::getInstance()->settings->get_ldap_unit_id($unit_label);
+    $unit_id = Controller::getInstance()->settings->get_ldap_unit_id($unit_label);
 	    
     $url = "/global-error/403.php?error_type=accred&right=${right}&unit_id=${unit_id}&unit_label=${unit_label}";
 
