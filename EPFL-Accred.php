@@ -103,7 +103,7 @@ class Controller
 
         if (empty(trim($user_role)) && $user === false) {
             // User unknown and has no role: die() early (don't create it)
-            echo ___("Utilisateur inconnu");
+            do_action("epfl_accred_403_user_no_role");
             die();
         }
 
@@ -135,7 +135,7 @@ class Controller
         if (empty(trim($user_role))) {
             // User with no role, but exists in database: die late
             // (*after* invalidating their rights in the WP database)
-            echo ___("Accès refusé");
+            do_action("epfl_accred_403_user_no_role");
             die();
         }
     }
@@ -338,6 +338,36 @@ TABLE_FOOTER;
     function sanitize_unit ($value)
     {
         return strtoupper(trim($value));
+    }
+    
+    /**
+     * Returns the LDAP unit id from it's label.
+     */
+    function get_ldap_unit_id($unit_label)
+    {
+        $dn = "o=epfl,c=ch";
+
+        $ds = ldap_connect("ldap.epfl.ch") or die ("Error connecting to LDAP");
+
+        if ($ds === false) {
+          return false;
+        }
+
+        ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+
+        $result = ldap_search($ds, $dn, "(&(cn=". $unit_label .")(objectclass=EPFLorganizationalUnit))");
+
+        if ($result === false) {
+          return false;
+        }
+
+        $infos = ldap_get_entries($ds, $result);
+
+        $unit_id = ($infos['count'] > 0) ? $infos[0]['uniqueidentifier'][0]:null;
+
+        ldap_close($ds);
+
+        return $unit_id;
     }
 }
 
