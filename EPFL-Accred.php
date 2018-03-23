@@ -290,7 +290,7 @@ TABLE_FOOTER;
 
     function get_access_level_from_accred ($tequila_data)
     {
-        $owner_unit = trim($this->get('unit'));
+        $owner_unit = strtoupper(trim($this->get('unit')));
         if (empty($owner_unit)) {
             return null;
         }
