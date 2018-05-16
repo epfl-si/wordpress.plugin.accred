@@ -296,7 +296,7 @@ TABLE_FOOTER;
         }
         if ($this->_find_unit_in_droits($owner_unit, $tequila_data['droit-WordPress.Admin'])) {
             $this->debug("Access level from accred is administrator");
-            return "administrator";
+            return "editor";
         } elseif ($this->_find_unit_in_droits($owner_unit, $tequila_data['droit-WordPress.Editor'])) {
             $this->debug("Access level from accred is editor");
             return "editor";
