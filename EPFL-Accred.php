@@ -2,7 +2,7 @@
 /*
  * Plugin Name: EPFL Accred
  * Description: Automatically sync access rights to WordPress from EPFL's institutional data repositories
- * Version:     0.8
+ * Version:     0.10
  * Author:      Dominique Quatravaux
  * Author URI:  mailto:dominique.quatravaux@epfl.ch
  */
@@ -144,6 +144,9 @@ class Controller
 class Settings extends \EPFL\SettingsBase
 {
     const SLUG = "epfl_accred";
+    /* We don't look in o=epfl,c=ch because some units can be for example in c=ch*/
+    const LDAP_BASE_DN = "c=ch";
+    const LDAP_HOST = "ldap.epfl.ch";
     var $vpsi_lockdown = false;
     var $is_debug_enabled = false;
 
@@ -155,6 +158,45 @@ class Settings extends \EPFL\SettingsBase
             ___('Accred (contrôle d\'accès)'),          // $menu_title,
             'manage_options');                          // $capability
         add_action('admin_init', array($this, 'setup_options_page'));
+
+    }
+
+    /**
+    * Validate entered unit label and save unit id in DB if label is correct.
+    */
+    function validate_unit($unit_label)
+    {
+        if(empty($unit_label))
+        {
+            add_settings_error(
+			    'unit',
+			    'empty',
+			    ___('Ne peut pas être vide'),
+			    'error'
+		    );
+        }
+        else
+        {
+
+            /* Getting LDAP ID from label*/
+            $unit_id = $this->get_ldap_unit_id($unit_label);
+
+            if($unit_id === null)
+            {
+                add_settings_error(
+                    'unit',
+                    'empty',
+                    ___("Unité ".$unit_label." non trouvée dans LDAP"),
+                    'error'
+                );
+            }
+            else /* ID has been found, we update it in database */
+            {
+                $this->update('unit_id', $unit_id);
+            }
+        }
+        return $unit_label;
+
     }
 
     /**
@@ -162,6 +204,15 @@ class Settings extends \EPFL\SettingsBase
      */
     function setup_options_page()
     {
+
+        /* We first get unit ID to update unit label in database if it changed */
+        $unit_id = $this->get('unit_id');
+        if(!empty($unit_id))
+        {
+            $unit_label = $this->get_ldap_unit_label($unit_id);
+            $this->update('unit', $unit_label);
+        }
+
 
         $this->add_settings_section('section_about', ___('À propos'));
         $this->add_settings_section('section_help', ___('Aide'));
@@ -177,6 +228,7 @@ class Settings extends \EPFL\SettingsBase
         if (! $this->vpsi_lockdown) {
             $this->register_setting('unit', array(
                 'type'    => 'string',
+                'sanitize_callback' => array($this, 'validate_unit'),
             ));
             // See ->sanitize_unit()
             $this->add_settings_field(
@@ -290,10 +342,15 @@ TABLE_FOOTER;
 
     function get_access_level_from_accred ($tequila_data)
     {
-        $owner_unit = strtoupper(trim($this->get('unit')));
-        if (empty($owner_unit)) {
+        $owner_unit_id = trim($this->get('unit_id'));
+        if (empty($owner_unit_id)) {
             return null;
         }
+
+        /* Looking for unit label in LDAP because matching is done with it*/
+        $owner_unit = strtoupper($this->get_ldap_unit_label($owner_unit_id));
+        $this->debug("Owner unit label (toUpper) found for ID '".$owner_unit_id."' = ".$owner_unit);
+
         if ($this->_find_unit_in_droits($owner_unit, $tequila_data['droit-WordPress.Admin'])) {
             $this->debug("Access level from accred is administrator");
             return "editor";
@@ -339,17 +396,52 @@ TABLE_FOOTER;
     {
         return strtoupper(trim($value));
     }
-    
+
+
+    /**
+     * Returns the LDAP unit label from it's id.
+     */
+    function get_ldap_unit_label($unit_id)
+    {
+
+        $dn = self::LDAP_BASE_DN;
+
+        $ds = ldap_connect(self::LDAP_HOST) or die ("Error connecting to LDAP");
+
+        if ($ds === false) {
+          error_log("Cannot connect to LDAP");
+          return false;
+        }
+
+        ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+
+        $result = ldap_search($ds, $dn, "(&(uniqueidentifier=". $unit_id .")(objectclass=EPFLorganizationalUnit))");
+
+        if ($result === false) {
+          error_log(ldap_error($ds));
+          return false;
+        }
+
+        $infos = ldap_get_entries($ds, $result);
+
+        $unit_label = ($infos['count'] > 0) ? $infos[0]['cn'][0]:null;
+
+        ldap_close($ds);
+
+        return $unit_label;
+    }
+
     /**
      * Returns the LDAP unit id from it's label.
      */
     function get_ldap_unit_id($unit_label)
     {
-        $dn = "o=epfl,c=ch";
+        $dn = self::LDAP_BASE_DN;
 
-        $ds = ldap_connect("ldap.epfl.ch") or die ("Error connecting to LDAP");
+        $ds = ldap_connect(self::LDAP_HOST) or die ("Error connecting to LDAP");
 
         if ($ds === false) {
+          error_log("Cannot connect to LDAP");
           return false;
         }
 
@@ -358,6 +450,8 @@ TABLE_FOOTER;
         $result = ldap_search($ds, $dn, "(&(cn=". $unit_label .")(objectclass=EPFLorganizationalUnit))");
 
         if ($result === false) {
+
+          error_log(ldap_error($ds));
           return false;
         }
 
