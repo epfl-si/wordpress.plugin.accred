@@ -55,6 +55,19 @@ class SettingsBase
     }
 
     /**
+     * @return Update the current setting for $key
+     */
+    public function update ($key, $value)
+    {
+        $optname = $this->option_name($key);
+        if ( $this->is_network_version() ) {
+            return update_site_option( $optname );
+        } else {
+            return update_option( $optname , $value);
+        }
+    }
+
+    /**
      * @returns Whether this plugin is currently network activated
      */
     var $_is_network_version = null;
