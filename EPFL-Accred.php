@@ -287,7 +287,7 @@ HELP
     function render_field_admin_groups ()
     {
         $role_column_head  = ___("Rôle");
-        $group_column_head = ___("Groupe");
+        $group_column_head = ___("Groupe(s) <small>(si plusieurs, séparés par des virgules)</small>");
         echo <<<TABLE_HEADER
             <table id="admin_groups">
               <tr><th>$role_column_head</th>
