@@ -325,16 +325,23 @@ TABLE_FOOTER;
 
     function get_access_level_from_groups ($tequila_data)
     {
+        $this->debug("Tequila groups: ". var_export($tequila_data['group'], true));
         if (empty(trim($tequila_data['group']))) return null;
         $user_groups = explode(",", $tequila_data['group']);
 
         foreach ($this->role_settings() as $role => $role_setting) {
+            $this->debug("Checking role: $role ($role_setting)");
             $role_group = $this->get($role_setting);
+            $this->debug("Role group found: ".var_export($role_group, true));
             if (empty(trim($role_group))) continue;
 
-            if (in_array($role_group, $user_groups)) {
-                $this->debug("Access level from groups is $role");
-                return $role;
+            foreach(explode(",", $role_group) as $role_group_name)
+            {
+                $this->debug("Checking group: ".var_export($role_group_name, true));
+                if (in_array(trim($role_group_name), $user_groups)) {
+                    $this->debug("Access level from groups is $role");
+                    return $role;
+                }
             }
         }
         return null;
