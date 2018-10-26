@@ -337,6 +337,7 @@ TABLE_FOOTER;
 
             foreach(explode(",", $role_group) as $role_group_name)
             {
+                if (empty(trim($role_group_name))) continue;
                 $this->debug("Checking group: ".var_export($role_group_name, true));
                 if (in_array(trim($role_group_name), $user_groups)) {
                     $this->debug("Access level from groups is $role");
