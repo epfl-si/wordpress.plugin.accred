@@ -59,6 +59,7 @@ class Roles
 
 class Controller
 {
+    const HIDE_ADMINBAR_FOR_ROLES = array('subscriber');
     static $instance = false;
     var $settings = null;
     var $is_debug_enabled = false;
@@ -131,6 +132,9 @@ class Controller
             $userdata['ID'] = $user->ID;
             $user_id = wp_update_user($userdata);
         }
+
+        /* Hide admin bar if necessary */
+        update_user_meta( $user->ID, 'show_admin_bar_front', !in_array($user_role, $this::HIDE_ADMINBAR_FOR_ROLES));
 
         if (empty(trim($user_role))) {
             // User with no role, but exists in database: die late
