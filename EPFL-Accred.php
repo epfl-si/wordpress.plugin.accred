@@ -339,6 +339,14 @@ TABLE_FOOTER;
             $this->debug("Role group found: ".var_export($role_group, true));
             if (empty(trim($role_group))) continue;
 
+            /* If everyone has access for role */
+            if($role_group == "*")
+            {
+                $this->debug("Everyone access granted for role ".$role);
+                return $role;
+            }
+
+            /* Looping through groups defined for role */
             foreach(explode(",", $role_group) as $role_group_name)
             {
                 if (empty(trim($role_group_name))) continue;
