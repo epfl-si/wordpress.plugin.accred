@@ -60,6 +60,7 @@ class Roles
 class Controller
 {
     const HIDE_ADMINBAR_FOR_ROLES = array('subscriber');
+
     static $instance = false;
     var $settings = null;
     var $is_debug_enabled = false;
@@ -67,7 +68,7 @@ class Controller
     function debug ($msg)
     {
         if ($this->is_debug_enabled) {
-            error_log($msg);
+            error_log("Accred: ".$msg);
         }
     }
 
@@ -96,6 +97,8 @@ class Controller
      */
     function tequila_save_user($tequila_data)
     {
+        $this->debug("-> tequila_save_user:\n". var_export($tequila_data, true));
+
         $user = get_user_by("login", $tequila_data["username"]);
         $user_role = $this->settings->get_access_level($tequila_data);
         if (! $user_role) {
@@ -332,20 +335,17 @@ TABLE_FOOTER;
         $this->debug("Tequila groups: ". var_export($tequila_data['group'], true));
         if (empty(trim($tequila_data['group']))) return null;
         $user_groups = explode(",", $tequila_data['group']);
-
         foreach ($this->role_settings() as $role => $role_setting) {
             $this->debug("Checking role: $role ($role_setting)");
             $role_group = $this->get($role_setting);
             $this->debug("Role group found: ".var_export($role_group, true));
             if (empty(trim($role_group))) continue;
-
             /* If everyone has access for role */
             if($role_group == "*")
             {
                 $this->debug("Everyone access granted for role ".$role);
                 return $role;
             }
-
             /* Looping through groups defined for role */
             foreach(explode(",", $role_group) as $role_group_name)
             {
