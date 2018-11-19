@@ -2,7 +2,7 @@
 /*
  * Plugin Name: EPFL Accred
  * Description: Automatically sync access rights to WordPress from EPFL's institutional data repositories
- * Version:     0.10
+ * Version:     0.11 (vpsi)
  * Author:      Dominique Quatravaux
  * Author URI:  mailto:dominique.quatravaux@epfl.ch
  */
@@ -59,6 +59,8 @@ class Roles
 
 class Controller
 {
+    const HIDE_ADMINBAR_FOR_ROLES = array('subscriber');
+
     static $instance = false;
     var $settings = null;
     var $is_debug_enabled = false;
@@ -66,7 +68,7 @@ class Controller
     function debug ($msg)
     {
         if ($this->is_debug_enabled) {
-            error_log($msg);
+            error_log("Accred: ".$msg);
         }
     }
 
@@ -95,6 +97,8 @@ class Controller
      */
     function tequila_save_user($tequila_data)
     {
+        $this->debug("-> tequila_save_user:\n". var_export($tequila_data, true));
+
         $user = get_user_by("login", $tequila_data["username"]);
         $user_role = $this->settings->get_access_level($tequila_data);
         if (! $user_role) {
@@ -131,6 +135,9 @@ class Controller
             $userdata['ID'] = $user->ID;
             $user_id = wp_update_user($userdata);
         }
+
+        /* Hide admin bar if necessary */
+        update_user_meta( $user->ID, 'show_admin_bar_front', !in_array($user_role, $this::HIDE_ADMINBAR_FOR_ROLES));
 
         if (empty(trim($user_role))) {
             // User with no role, but exists in database: die late
@@ -287,7 +294,7 @@ HELP
     function render_field_admin_groups ()
     {
         $role_column_head  = ___("Rôle");
-        $group_column_head = ___("Groupe");
+        $group_column_head = ___("Groupe(s) <small>(si plusieurs, séparés par des virgules)</small>");
         echo <<<TABLE_HEADER
             <table id="admin_groups">
               <tr><th>$role_column_head</th>
@@ -325,16 +332,29 @@ TABLE_FOOTER;
 
     function get_access_level_from_groups ($tequila_data)
     {
+        $this->debug("Tequila groups: ". var_export($tequila_data['group'], true));
         if (empty(trim($tequila_data['group']))) return null;
         $user_groups = explode(",", $tequila_data['group']);
-
         foreach ($this->role_settings() as $role => $role_setting) {
+            $this->debug("Checking role: $role ($role_setting)");
             $role_group = $this->get($role_setting);
+            $this->debug("Role group found: ".var_export($role_group, true));
             if (empty(trim($role_group))) continue;
-
-            if (in_array($role_group, $user_groups)) {
-                $this->debug("Access level from groups is $role");
+            /* If everyone has access for role */
+            if($role_group == "*")
+            {
+                $this->debug("Everyone access granted for role ".$role);
                 return $role;
+            }
+            /* Looping through groups defined for role */
+            foreach(explode(",", $role_group) as $role_group_name)
+            {
+                if (empty(trim($role_group_name))) continue;
+                $this->debug("Checking group: ".var_export($role_group_name, true));
+                if (in_array(trim($role_group_name), $user_groups)) {
+                    $this->debug("Access level from groups is $role");
+                    return $role;
+                }
             }
         }
         return null;
