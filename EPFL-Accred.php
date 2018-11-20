@@ -137,7 +137,7 @@ class Controller
         }
 
         /* Hide admin bar if necessary */
-        update_user_meta( $user->ID, 'show_admin_bar_front', !in_array($user_role, $this::HIDE_ADMINBAR_FOR_ROLES));
+        update_user_meta( $user->ID, 'show_admin_bar_front', in_array($user_role, $this::HIDE_ADMINBAR_FOR_ROLES)?'false':'true');
 
         if (empty(trim($user_role))) {
             // User with no role, but exists in database: die late
