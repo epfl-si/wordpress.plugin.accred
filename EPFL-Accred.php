@@ -334,7 +334,7 @@ TABLE_FOOTER;
     {
         $this->debug("Tequila groups: ". var_export($tequila_data['group'], true));
         if (empty(trim($tequila_data['group']))) return null;
-        $user_groups = explode(",", $tequila_data['group']);
+        $user_groups = explode(",", strtolower($tequila_data['group']));
         foreach ($this->role_settings() as $role => $role_setting) {
             $this->debug("Checking role: $role ($role_setting)");
             $role_group = $this->get($role_setting);
@@ -347,7 +347,7 @@ TABLE_FOOTER;
                 return $role;
             }
             /* Looping through groups defined for role */
-            foreach(explode(",", $role_group) as $role_group_name)
+            foreach(explode(",", strtolower($role_group)) as $role_group_name)
             {
                 if (empty(trim($role_group_name))) continue;
                 $this->debug("Checking group: ".var_export($role_group_name, true));
