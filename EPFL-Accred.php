@@ -147,12 +147,6 @@ class Controller
 
             $userdata['ID'] = $user->ID;
             $user_id = wp_update_user($userdata);
-
-            if (is_wp_error( $user_id ) ) {
-                $this->debug("User update error: ".$user_id->get_error_message());
-                echo $user_id->get_error_message();
-                die();
-            }
         }
 
         /* Hide admin bar if necessary */
