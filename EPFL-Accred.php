@@ -101,7 +101,6 @@ class Controller
 
         // Getting by slug (this is where we store uniqueid, which never change)
         $user = get_user_by("slug", $tequila_data["uniqueid"]);
-        $this->debug("--> User in DB: ". var_export($user, true));
         $user_role = $this->settings->get_access_level($tequila_data);
         if (! $user_role) {
             $user_role = "";  // So that wp_update_user() removes the right
@@ -129,7 +128,6 @@ class Controller
             if ( ! is_wp_error( $new_user_id ) ) {
                 $user = new \WP_User($new_user_id);
             } else {
-                $this->debug("User insert error: ". $new_user_id->get_error_message());
                 echo $new_user_id->get_error_message();
                 die();
             }
