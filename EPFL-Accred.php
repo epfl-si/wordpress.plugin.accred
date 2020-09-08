@@ -2,7 +2,7 @@
 /*
  * Plugin Name: EPFL Accred
  * Description: Automatically sync access rights to WordPress from EPFL's institutional data repositories
- * Version:     0.13 (vpsi)
+ * Version:     0.14 (vpsi)
  * Author:      Dominique Quatravaux
  * Author URI:  mailto:dominique.quatravaux@epfl.ch
  */
@@ -99,7 +99,8 @@ class Controller
     {
         $this->debug("-> tequila_save_user:\n". var_export($tequila_data, true));
 
-        $user = get_user_by("login", $tequila_data["username"]);
+        // Getting by slug (this is where we store uniqueid, which never change)
+        $user = get_user_by("slug", $tequila_data["uniqueid"]);
         $user_role = $this->settings->get_access_level($tequila_data);
         if (! $user_role) {
             $user_role = "";  // So that wp_update_user() removes the right
@@ -132,6 +133,16 @@ class Controller
             }
         } else {  // User is already known to WordPress
             $this->debug("Updating user");
+
+            // if username has changed
+            if($tequila_data['username'] != $user->user_login)
+            {
+                $this->debug("Username has changed from ".$user->user_login." to ".$tequila_data['username']);
+                // We have to "manually" update username in DB with a request because using 'wp_update_user' won't work...
+                global $wpdb;
+                $wpdb->update($wpdb->users, array('user_login' => $tequila_data['username']), array('ID' => $user->ID));
+            }
+
             $userdata['ID'] = $user->ID;
             $user_id = wp_update_user($userdata);
         }
