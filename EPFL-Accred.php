@@ -2,7 +2,7 @@
 /*
  * Plugin Name: EPFL Accred
  * Description: Automatically sync access rights to WordPress from EPFL's institutional data repositories
- * Version:     0.13 (vpsi)
+ * Version:     0.14 (vpsi)
  * Author:      Dominique Quatravaux
  * Author URI:  mailto:dominique.quatravaux@epfl.ch
  */
@@ -63,7 +63,7 @@ class Controller
 
     static $instance = false;
     var $settings = null;
-    var $is_debug_enabled = false;
+    var $is_debug_enabled = true;
 
     function debug ($msg)
     {
@@ -99,7 +99,9 @@ class Controller
     {
         $this->debug("-> tequila_save_user:\n". var_export($tequila_data, true));
 
-        $user = get_user_by("login", $tequila_data["username"]);
+        // Getting by slug (this is where we store uniqueid, which never change)
+        $user = get_user_by("slug", $tequila_data["uniqueid"]);
+        $this->debug("--> User in DB: ". var_export($user, true));
         $user_role = $this->settings->get_access_level($tequila_data);
         if (! $user_role) {
             $user_role = "";  // So that wp_update_user() removes the right
@@ -127,13 +129,30 @@ class Controller
             if ( ! is_wp_error( $new_user_id ) ) {
                 $user = new \WP_User($new_user_id);
             } else {
+                $this->debug("User insert error: ". $new_user_id->get_error_message());
                 echo $new_user_id->get_error_message();
                 die();
             }
         } else {  // User is already known to WordPress
             $this->debug("Updating user");
+
+            // if username has changed
+            if($tequila_data['username'] != $user->user_login)
+            {
+                $this->debug("Username has changed from ".$user->user_login." to ".$tequila_data['username']);
+                // We have to "manually" update username in DB with a request because using 'wp_update_user' won't work...
+                global $wpdb;
+                $wpdb->update($wpdb->users, array('user_login' => $tequila_data['username']), array('ID' => $user->ID));
+            }
+
             $userdata['ID'] = $user->ID;
             $user_id = wp_update_user($userdata);
+
+            if (is_wp_error( $user_id ) ) {
+                $this->debug("User update error: ".$user_id->get_error_message());
+                echo $user_id->get_error_message();
+                die();
+            }
         }
 
         /* Hide admin bar if necessary */
