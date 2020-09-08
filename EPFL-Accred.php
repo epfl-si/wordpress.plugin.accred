@@ -63,7 +63,7 @@ class Controller
 
     static $instance = false;
     var $settings = null;
-    var $is_debug_enabled = true;
+    var $is_debug_enabled = false;
 
     function debug ($msg)
     {
