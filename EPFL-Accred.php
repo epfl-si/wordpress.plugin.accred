@@ -222,16 +222,6 @@ class Settings extends \EPFL\SettingsBase
      */
     function setup_options_page()
     {
-
-        /* We first get unit ID to update unit label in database if it changed */
-        $unit_id = $this->get('unit_id');
-        if(!empty($unit_id))
-        {
-            $unit_label = $this->get_ldap_unit_label($unit_id);
-            $this->update('unit', $unit_label);
-        }
-
-
         $this->add_settings_section('section_about', ___('À propos'));
         $this->add_settings_section('section_help', ___('Aide'));
         $this->add_settings_section('section_settings', ___('Paramètres'));
@@ -434,7 +424,6 @@ TABLE_FOOTER;
      */
     function get_ldap_unit_label($unit_id)
     {
-
         $dn = self::LDAP_BASE_DN;
 
         $ds = ldap_connect(self::LDAP_HOST) or die ("Error connecting to LDAP");
