@@ -5,6 +5,7 @@
 namespace EPFL\Accred;
 use \WP_CLI;
 
+#[AllowDynamicProperties]
 class CLI
 {
     public function __construct ($parent_controller)
