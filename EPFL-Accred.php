@@ -392,7 +392,7 @@ TABLE_FOOTER;
 
     function _find_unit_in_droits ($unit, $comma_separated_list_of_units)
     {
-        if (empty(trim($comma_separated_list_of_units)) or empty(trim($unit))) {
+        if (empty($comma_separated_list_of_units) or empty(trim($comma_separated_list_of_units)) or empty($unit) or empty(trim($unit))) {
             return FALSE;
         }
         $found = array_search($unit, explode(",", $comma_separated_list_of_units));
