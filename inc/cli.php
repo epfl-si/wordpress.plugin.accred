@@ -8,6 +8,8 @@ use \WP_CLI;
 #[AllowDynamicProperties]
 class CLI
 {
+		private $controller;
+
     public function __construct ($parent_controller)
     {
         $this->controller = $parent_controller;
